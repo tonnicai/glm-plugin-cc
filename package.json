@@ -1,5 +1,5 @@
 {
-  "name": "@z-ai/glm-plugin-cc",
+  "name": "@tonnicai/glm-plugin-cc",
   "version": "0.1.0",
   "private": true,
   "type": "module",

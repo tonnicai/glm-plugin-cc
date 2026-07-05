@@ -87,7 +87,10 @@ export function defaultClaudeSettingsPath() {
 
 export function resolveSettingsPath(options = {}, cwd = process.cwd()) {
   if (options.settings) {
-    return path.resolve(cwd, String(options.settings));
+    if (process.env.GLM_COMPANION_ALLOW_SETTINGS_PATH === "1") {
+      return path.resolve(cwd, String(options.settings));
+    }
+    throw new Error("`--settings` is for tests only. Use --scope user, --scope project, or --scope local.");
   }
   const scope = String(options.scope ?? "user").toLowerCase();
   if (scope === "local") {
@@ -314,13 +317,20 @@ function renderSetup(report) {
   return `${lines.join("\n")}\n`;
 }
 
-async function runLiveProbe(settings, options = {}) {
+export async function runLiveProbe(settings, options = {}) {
   const env = isObject(settings.env) ? settings.env : {};
+  const baseUrl = String(env.ANTHROPIC_BASE_URL || CODING_PLAN_ANTHROPIC_BASE_URL).replace(/\/+$/, "");
+  if (baseUrl !== CODING_PLAN_ANTHROPIC_BASE_URL) {
+    return {
+      ok: false,
+      skipped: true,
+      reason: `Refusing live probe because ANTHROPIC_BASE_URL is ${baseUrl}. Expected ${CODING_PLAN_ANTHROPIC_BASE_URL}.`
+    };
+  }
   const token = normalizeToken(env.ANTHROPIC_AUTH_TOKEN || env.ANTHROPIC_API_KEY || process.env.ZAI_API_KEY || process.env.Z_AI_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
   if (!token) {
     return { ok: false, skipped: true, reason: "No token available for live probe." };
   }
-  const baseUrl = String(env.ANTHROPIC_BASE_URL || CODING_PLAN_ANTHROPIC_BASE_URL).replace(/\/+$/, "");
   const model = String(options.model || env.ANTHROPIC_DEFAULT_OPUS_MODEL || DEFAULT_GLM_MODEL);
   const response = await fetch(`${baseUrl}/v1/messages`, {
     method: "POST",

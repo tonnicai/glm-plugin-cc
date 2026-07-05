@@ -7,7 +7,7 @@ allowed-tools: Bash(node:*)
 Run:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/glm-companion.mjs" doctor $ARGUMENTS
+node "${CLAUDE_PLUGIN_ROOT}/scripts/glm-companion.mjs" doctor "$ARGUMENTS"
 ```
 
 Output rules:

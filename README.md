@@ -149,6 +149,13 @@ Delegates a substantial debugging or implementation task to the GLM rescue subag
 /glm:rescue fix the failing upload retry test
 ```
 
+## Security Notes
+
+- This plugin has no install-time scripts, hooks, or runtime dependencies.
+- `/glm:doctor --live` sends a tiny test request only to `https://api.z.ai/api/anthropic`; it refuses to send a bearer token if `ANTHROPIC_BASE_URL` points anywhere else.
+- Prefer `/glm:setup --write --key-env ZAI_API_KEY` over `/glm:setup --write --key <token>` so the token is not typed into the slash-command transcript.
+- Avoid `--scope project` or `--scope local` when storing real tokens unless the relevant `.claude` settings file is ignored and never committed.
+- `/glm:rescue` is intentionally edit-capable and can run shell commands through Claude Code. Use it only in repositories where you are comfortable granting a coding agent normal implementation permissions.
 ## Limitations
 
 - `openai/codex-plugin-cc` talks to Codex's app-server runtime and can manage Codex background jobs. Z.ai's Claude Code integration uses Claude Code's model routing instead, so this plugin does not provide an independent GLM job server.
@@ -165,5 +172,3 @@ npm run validate
 ## License
 
 Apache-2.0. This fork keeps attribution to `openai/codex-plugin-cc` in `NOTICE`.
-
-
