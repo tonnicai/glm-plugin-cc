@@ -35,16 +35,21 @@ https://api.z.ai/api/coding/paas/v4
 
 This plugin targets Claude Code, so it configures `ANTHROPIC_BASE_URL` to the Anthropic-compatible Coding Plan endpoint.
 
-## Install Locally
+## Install From GitHub
 
-From this repository root:
+```bash
+claude plugin marketplace add https://github.com/tonnicai/glm-plugin-cc
+claude plugin install glm@z-ai-glm
+```
+
+The GitHub install path requires this repository to be public, or the installing user must have access to the private repository and a Git credential setup that Claude Code can use.
+
+For local development from a clone of this repository:
 
 ```bash
 claude plugin marketplace add .
 claude plugin install glm@z-ai-glm
 ```
-
-If your Claude Code build uses a different marketplace syntax, add the repository root as a local plugin marketplace and install the `glm` plugin from the `z-ai-glm` marketplace.
 
 ## Configure Claude Code For GLM
 
@@ -86,7 +91,7 @@ The setup helper writes these Claude Code settings:
 }
 ```
 
-Restart Claude Code after changing endpoint or model settings. For harder coding tasks, use Claude Code's /effort max command after restart; Z.ai maps xhigh, max, and ultracode to GLM-5.2 max effort.
+Restart Claude Code after changing endpoint or model settings. For harder coding tasks, use Claude Code's `/effort max` command after restart; Z.ai maps `xhigh`, `max`, and `ultracode` to GLM-5.2 max effort.
 
 ## Commands
 
