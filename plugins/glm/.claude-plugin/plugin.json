@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "glm",
+  "displayName": "GLM Coding Plan",
+  "version": "0.1.0",
+  "description": "Configure and use Z.ai GLM Coding Plan models such as GLM-5.2 from Claude Code.",
+  "author": {
+    "name": "Z.ai community"
+  },
+  "homepage": "https://docs.z.ai/devpack/quick-start",
+  "repository": "https://github.com/z-ai/glm-plugin-cc",
+  "license": "Apache-2.0",
+  "keywords": [
+    "z.ai",
+    "glm",
+    "glm-5.2",
+    "claude-code",
+    "coding-agent"
+  ]
+}

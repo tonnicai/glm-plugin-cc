@@ -1,320 +1,163 @@
-# Codex plugin for Claude Code
+# GLM Plugin for Claude Code
 
-Use Codex from inside Claude Code for code reviews or to delegate tasks to Codex.
+A Claude Code plugin for using Z.ai GLM Coding Plan models, especially `glm-5.2[1m]`, from the same kind of command surface that `openai/codex-plugin-cc` provides for Codex.
 
-This plugin is for Claude Code users who want an easy way to start using Codex from the workflow
-they already have.
+This is a local fork/port of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc), but it is not a background Codex app-server clone. Z.ai's Coding Plan integrates with Claude Code through an Anthropic-compatible endpoint, so this plugin configures Claude Code to route its active model to GLM and adds `/glm:*` commands for setup, review, diagnosis, and rescue workflows.
 
-<video src="./docs/plugin-demo.webm" controls muted playsinline autoplay></video>
+## What It Provides
 
-## What You Get
+- `/glm:setup` configures Claude Code settings for Z.ai Coding Plan.
+- `/glm:status` shows whether Claude Code is currently pointed at GLM.
+- `/glm:doctor` checks the same settings and can optionally send a tiny live test request.
+- `/glm:review` performs a review-only pass over local git changes using the active GLM-backed Claude Code model.
+- `/glm:adversarial-review` runs a stricter review prompt for hidden regressions and edge cases.
+- `/glm:rescue` delegates substantial debugging or implementation work to the `glm-rescue` subagent.
 
-- `/codex:review` for a normal read-only Codex review
-- `/codex:adversarial-review` for a steerable challenge review
-- `/codex:rescue`, `/codex:transfer`, `/codex:status`, `/codex:result`, and `/codex:cancel` to delegate work, hand off sessions, and manage background jobs
+## Endpoint Model
 
-## Requirements
-
-- **ChatGPT subscription (incl. Free) or OpenAI API key.**
-  - Usage will contribute to your Codex usage limits. [Learn more](https://developers.openai.com/codex/pricing).
-- **Node.js 18.18 or later**
-
-## Install
-
-Add the marketplace in Claude Code:
-
-```bash
-/plugin marketplace add openai/codex-plugin-cc
-```
-
-Install the plugin:
-
-```bash
-/plugin install codex@openai-codex
-```
-
-Reload plugins:
-
-```bash
-/reload-plugins
-```
-
-Then run:
-
-```bash
-/codex:setup
-```
-
-`/codex:setup` will tell you whether Codex is ready. If Codex is missing and npm is available, it can offer to install Codex for you.
-
-If you prefer to install Codex yourself, use:
-
-```bash
-npm install -g @openai/codex
-```
-
-If Codex is installed but not logged in yet, run:
-
-```bash
-!codex login
-```
-
-After install, you should see:
-
-- the slash commands listed below
-- the `codex:codex-rescue` subagent in `/agents`
-
-One simple first run is:
-
-```bash
-/codex:review --background
-/codex:status
-/codex:result
-```
-
-## Usage
-
-### `/codex:review`
-
-Runs a normal Codex review on your current work. It gives you the same quality of code review as running `/review` inside Codex directly.
-
-> [!NOTE]
-> Code review especially for multi-file changes might take a while. It's generally recommended to run it in the background.
-
-Use it when you want:
-
-- a review of your current uncommitted changes
-- a review of your branch compared to a base branch like `main`
-
-Use `--base <ref>` for branch review. It also supports `--wait` and `--background`. It is not steerable and does not take custom focus text. Use [`/codex:adversarial-review`](#codexadversarial-review) when you want to challenge a specific decision or risk area.
-
-Examples:
-
-```bash
-/codex:review
-/codex:review --base main
-/codex:review --background
-```
-
-This command is read-only and will not perform any changes. When run in the background you can use [`/codex:status`](#codexstatus) to check on the progress and [`/codex:cancel`](#codexcancel) to cancel the ongoing task.
-
-### `/codex:adversarial-review`
-
-Runs a **steerable** review that questions the chosen implementation and design.
-
-It can be used to pressure-test assumptions, tradeoffs, failure modes, and whether a different approach would have been safer or simpler.
-
-It uses the same review target selection as `/codex:review`, including `--base <ref>` for branch review.
-It also supports `--wait` and `--background`. Unlike `/codex:review`, it can take extra focus text after the flags.
-
-Use it when you want:
-
-- a review before shipping that challenges the direction, not just the code details
-- review focused on design choices, tradeoffs, hidden assumptions, and alternative approaches
-- pressure-testing around specific risk areas like auth, data loss, rollback, race conditions, or reliability
-
-Examples:
-
-```bash
-/codex:adversarial-review
-/codex:adversarial-review --base main challenge whether this was the right caching and retry design
-/codex:adversarial-review --background look for race conditions and question the chosen approach
-```
-
-This command is read-only. It does not fix code.
-
-### `/codex:rescue`
-
-Hands a task to Codex through the `codex:codex-rescue` subagent.
-
-Use it when you want Codex to:
-
-- investigate a bug
-- try a fix
-- continue a previous Codex task
-- take a faster or cheaper pass with a smaller model
-
-> [!NOTE]
-> Depending on the task and the model you choose these tasks might take a long time and it's generally recommended to force the task to be in the background or move the agent to the background.
-
-It supports `--background`, `--wait`, `--resume`, and `--fresh`. If you omit `--resume` and `--fresh`, the plugin can offer to continue the latest rescue thread for this repo.
-
-Examples:
-
-```bash
-/codex:rescue investigate why the tests started failing
-/codex:rescue fix the failing test with the smallest safe patch
-/codex:rescue --resume apply the top fix from the last run
-/codex:rescue --model gpt-5.4-mini --effort medium investigate the flaky integration test
-/codex:rescue --model spark fix the issue quickly
-/codex:rescue --background investigate the regression
-```
-
-You can also just ask for a task to be delegated to Codex:
+Z.ai exposes more than one OpenAI-compatible surface. For a GLM Coding Plan subscription in Claude Code, use the Anthropic-compatible endpoint:
 
 ```text
-Ask Codex to redesign the database connection to be more resilient.
+https://api.z.ai/api/anthropic
 ```
 
-**Notes:**
+The normal Z.ai OpenAI-compatible endpoint is:
 
-- if you do not pass `--model` or `--effort`, Codex chooses its own defaults.
-- if you say `spark`, the plugin maps that to `gpt-5.3-codex-spark`
-- follow-up rescue requests can continue the latest Codex task in the repo
+```text
+https://api.z.ai/api/paas/v4
+```
 
-### `/codex:transfer`
+The Coding Plan OpenAI-compatible endpoint is:
 
-Creates a persistent Codex thread from the current Claude Code session and prints a `codex resume <session-id>` command.
+```text
+https://api.z.ai/api/coding/paas/v4
+```
 
-Use it when you started a debugging or implementation conversation in Claude Code and want to continue that same context directly in Codex.
+This plugin targets Claude Code, so it configures `ANTHROPIC_BASE_URL` to the Anthropic-compatible Coding Plan endpoint.
 
-Examples:
+## Install Locally
+
+From this repository root:
 
 ```bash
-/codex:transfer
-/codex:transfer --source ~/.claude/projects/-Users-me-repo/<session-id>.jsonl
+claude plugin marketplace add .
+claude plugin install glm@z-ai-glm
 ```
 
-The plugin's existing `SessionStart` hook supplies the current transcript path automatically; `--source` is available as a manual override. The transfer uses Codex's external-agent session importer, so it follows the same conversion rules as importing Claude history in the Codex App and creates visible turns that can be continued in the App or TUI. The source must be under `~/.claude/projects`, and older Codex versions that do not expose session import must be upgraded before using this command.
+If your Claude Code build uses a different marketplace syntax, add the repository root as a local plugin marketplace and install the `glm` plugin from the `z-ai-glm` marketplace.
 
-### `/codex:status`
+## Configure Claude Code For GLM
 
-Shows running and recent Codex jobs for the current repository.
-
-Examples:
+Set your Z.ai Coding Plan key in the shell that launches Claude Code, then run the setup command inside Claude Code. If Claude Code is already running from another launcher, restart it from that shell or use `--key <token>` instead:
 
 ```bash
-/codex:status
-/codex:status task-abc123
+export ZAI_API_KEY="zai-..."
 ```
 
-Use it to:
+```text
+/glm:setup --write --key-env ZAI_API_KEY
+```
 
-- check progress on background work
-- see the latest completed job
-- confirm whether a task is still running
+On Windows PowerShell:
 
-### `/codex:result`
+```powershell
+$env:ZAI_API_KEY = "zai-..."
+```
 
-Shows the final stored Codex output for a finished job.
-When available, it also includes the Codex session ID so you can reopen that run directly in Codex with `codex resume <session-id>`.
+Then in Claude Code:
 
-Examples:
+```text
+/glm:setup --write --key-env ZAI_API_KEY
+```
+
+The setup helper writes these Claude Code settings:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "<your token>",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_CUSTOM_MODEL_OPTION": "glm-5.2[1m]",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000"
+  }
+}
+```
+
+Restart Claude Code after changing endpoint or model settings. For harder coding tasks, use Claude Code's /effort max command after restart; Z.ai maps xhigh, max, and ultracode to GLM-5.2 max effort.
+
+## Commands
+
+### `/glm:setup`
+
+Preview or apply the recommended Claude Code settings.
+
+```text
+/glm:setup
+/glm:setup --write --key-env ZAI_API_KEY
+/glm:setup --write --model glm-5.2
+```
+
+By default it edits user settings at `~/.claude/settings.json`. Use `--scope project` or `--scope local` to write project-level Claude Code settings instead.
+
+### `/glm:status`
+
+Shows the configured endpoint, model aliases, compact window, effort forwarding flag, and whether an auth token is present. Tokens are redacted.
+
+```text
+/glm:status
+```
+
+### `/glm:doctor`
+
+Runs the same status checks. With `--live`, sends a tiny test request to Z.ai.
+
+```text
+/glm:doctor --live
+```
+
+### `/glm:review`
+
+Reviews local git state without editing files.
+
+```text
+/glm:review
+/glm:review --base main --scope branch
+/glm:review focus on auth and migration risk
+```
+
+### `/glm:adversarial-review`
+
+Runs a stricter, skeptical review-only pass.
+
+```text
+/glm:adversarial-review --base main
+```
+
+### `/glm:rescue`
+
+Delegates a substantial debugging or implementation task to the GLM rescue subagent.
+
+```text
+/glm:rescue fix the failing upload retry test
+```
+
+## Limitations
+
+- `openai/codex-plugin-cc` talks to Codex's app-server runtime and can manage Codex background jobs. Z.ai's Claude Code integration uses Claude Code's model routing instead, so this plugin does not provide an independent GLM job server.
+- Review and rescue commands use the active Claude Code runtime. Run `/glm:setup --write ...` and restart Claude Code before expecting them to execute on GLM.
+- The helper never embeds a key in this repository. It writes a token only when the user explicitly passes `--key` or `--key-env` at setup time.
+
+## Development
 
 ```bash
-/codex:result
-/codex:result task-abc123
+npm test
+npm run validate
 ```
 
-### `/codex:cancel`
+## License
 
-Cancels an active background Codex job.
+Apache-2.0. This fork keeps attribution to `openai/codex-plugin-cc` in `NOTICE`.
 
-Examples:
-
-```bash
-/codex:cancel
-/codex:cancel task-abc123
-```
-
-### `/codex:setup`
-
-Checks whether Codex is installed and authenticated.
-If Codex is missing and npm is available, it can offer to install Codex for you.
-
-You can also use `/codex:setup` to manage the optional review gate.
-
-#### Enabling review gate
-
-```bash
-/codex:setup --enable-review-gate
-/codex:setup --disable-review-gate
-```
-
-When the review gate is enabled, the plugin uses a `Stop` hook to run a targeted Codex review based on Claude's response. If that review finds issues, the stop is blocked so Claude can address them first.
-
-> [!WARNING]
-> The review gate can create a long-running Claude/Codex loop and may drain usage limits quickly. Only enable it when you plan to actively monitor the session.
-
-## Typical Flows
-
-### Review Before Shipping
-
-```bash
-/codex:review
-```
-
-### Hand A Problem To Codex
-
-```bash
-/codex:rescue investigate why the build is failing in CI
-```
-
-### Start Something Long-Running
-
-```bash
-/codex:adversarial-review --background
-/codex:rescue --background investigate the flaky test
-```
-
-Then check in with:
-
-```bash
-/codex:status
-/codex:result
-```
-
-## Codex Integration
-
-The Codex plugin wraps the [Codex app server](https://developers.openai.com/codex/app-server). It uses the global `codex` binary installed in your environment and [applies the same configuration](https://developers.openai.com/codex/config-basic).
-
-### Common Configurations
-
-If you want to change the default reasoning effort or the default model that gets used by the plugin, you can define that inside your user-level or project-level `config.toml`. For example to always use `gpt-5.4-mini` on `high` for a specific project you can add the following to a `.codex/config.toml` file at the root of the directory you started Claude in:
-
-```toml
-model = "gpt-5.4-mini"
-model_reasoning_effort = "high"
-```
-
-Your configuration will be picked up based on:
-
-- user-level config in `~/.codex/config.toml`
-- project-level overrides in `.codex/config.toml`
-- project-level overrides only load when the [project is trusted](https://developers.openai.com/codex/config-advanced#project-config-files-codexconfigtoml)
-
-Check out the Codex docs for more [configuration options](https://developers.openai.com/codex/config-reference).
-
-### Moving The Work Over To Codex
-
-Delegated tasks and any [stop gate](#what-does-the-review-gate-do) run can also be directly resumed inside Codex by running `codex resume` either with the specific session ID you received from running `/codex:result` or `/codex:status` or by selecting it from the list.
-
-This way you can review the Codex work or continue the work there.
-
-## FAQ
-
-### Do I need a separate Codex account for this plugin?
-
-If you are already signed into Codex on this machine, that account should work immediately here too. This plugin uses your local Codex CLI authentication.
-
-If you only use Claude Code today and have not used Codex yet, you will also need to sign in to Codex with either a ChatGPT account or an API key. [Codex is available with your ChatGPT subscription](https://developers.openai.com/codex/pricing/), and [`codex login`](https://developers.openai.com/codex/cli/reference/#codex-login) supports both ChatGPT and API key sign-in. Run `/codex:setup` to check whether Codex is ready, and use `!codex login` if it is not.
-
-### Does the plugin use a separate Codex runtime?
-
-No. This plugin delegates through your local [Codex CLI](https://developers.openai.com/codex/cli/) and [Codex app server](https://developers.openai.com/codex/app-server/) on the same machine.
-
-That means:
-
-- it uses the same Codex install you would use directly
-- it uses the same local authentication state
-- it uses the same repository checkout and machine-local environment
-
-### Will it use the same Codex config I already have?
-
-Yes. If you already use Codex, the plugin picks up the same [configuration](#common-configurations).
-
-### Can I keep using my current API key or base URL setup?
-
-Yes. Because the plugin uses your local Codex CLI, your existing sign-in method and config still apply.
-
-If you need to point the built-in OpenAI provider at a different endpoint, set `openai_base_url` in your [Codex config](https://developers.openai.com/codex/config-advanced/#config-and-state-locations).
