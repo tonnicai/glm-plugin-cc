@@ -1,10 +1,10 @@
 {
   "name": "z-ai-glm",
   "owner": {
-    "name": "Z.ai"
+    "name": "tonnicai"
   },
   "metadata": {
-    "description": "Claude Code plugin for using Z.ai GLM Coding Plan models such as GLM-5.2.",
+    "description": "Unofficial Claude Code plugin for using Z.ai GLM Coding Plan models such as GLM-5.2.",
     "version": "0.1.0"
   },
   "plugins": [
@@ -13,9 +13,10 @@
       "description": "Configure and use Z.ai GLM Coding Plan models from Claude Code.",
       "version": "0.1.0",
       "author": {
-        "name": "Z.ai community"
+        "name": "tonnicai"
       },
       "source": "./plugins/glm"
     }
   ]
 }
+

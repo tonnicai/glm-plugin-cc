@@ -1,8 +1,8 @@
 # GLM Plugin for Claude Code
 
-A Claude Code plugin for using Z.ai GLM Coding Plan models, especially `glm-5.2[1m]`, from the same kind of command surface that `openai/codex-plugin-cc` provides for Codex.
+An unofficial Claude Code plugin for using Z.ai GLM Coding Plan models, especially `glm-5.2[1m]`, from the same kind of command surface that `openai/codex-plugin-cc` provides for Codex.
 
-This is a local fork/port of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc), but it is not a background Codex app-server clone. Z.ai's Coding Plan integrates with Claude Code through an Anthropic-compatible endpoint, so this plugin configures Claude Code to route its active model to GLM and adds `/glm:*` commands for setup, review, diagnosis, and rescue workflows.
+This is an unofficial local fork/port of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc), but it is not a background Codex app-server clone. Z.ai's Coding Plan integrates with Claude Code through an Anthropic-compatible endpoint, so this plugin configures Claude Code to route its active model to GLM and adds `/glm:*` commands for setup, review, diagnosis, and rescue workflows.
 
 ## What It Provides
 
@@ -160,4 +160,5 @@ npm run validate
 ## License
 
 Apache-2.0. This fork keeps attribution to `openai/codex-plugin-cc` in `NOTICE`.
+
 
