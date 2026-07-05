@@ -104,7 +104,7 @@ By default it edits user settings at `~/.claude/settings.json`. Use `--scope pro
 
 ### `/glm:status`
 
-Shows the configured endpoint, model aliases, compact window, effort forwarding flag, and whether an auth token is present. Tokens are redacted.
+Shows the configured endpoint, model aliases, compact window, and whether an auth token is present. Tokens are redacted.
 
 ```text
 /glm:status
