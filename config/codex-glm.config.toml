@@ -1,17 +1,19 @@
-# >>> CURRENTLY NOT WORKING — verified 2026-07-07 <<<
-# Z.ai's coding endpoint has no OpenAI Responses API: POST
-# https://api.z.ai/api/coding/paas/v4/responses returns 404 with a valid key,
-# and codex >= 0.84 only speaks the Responses wire (chat-completions removed).
-# Until Z.ai ships a /responses endpoint, use the working backend instead:
-#   config/codex-glm-via-ollama-cloud.config.toml  (GLM-5.2 on Ollama Cloud)
-# This file is kept so the direct Z.ai backend is one copy away if/when
-# Z.ai adds Responses support.
+# Harness config for the `glm` plugin — copy to ~/.codex-glm/config.toml
+# GLM-5.2 served by Ollama Cloud. Get an API key at
+# https://ollama.com/settings/keys and export OLLAMA_API_KEY.
+#
+# model_context_window: codex cannot send Ollama's num_ctx over the OpenAI
+# wire; Ollama Cloud runs cloud models at their full advertised window
+# server-side. This key tells codex the window is 1M (GLM-5.2's advertised
+# size) so it budgets correctly and does not compact the conversation
+# prematurely.
 model = "glm-5.2"
-model_provider = "zai"
+model_context_window = 1000000
+model_provider = "ollama-cloud"
 
-[model_providers.zai]
-name = "Z.ai GLM Coding Plan"
-base_url = "https://api.z.ai/api/coding/paas/v4"
-env_key = "ZAI_API_KEY"
+[model_providers.ollama-cloud]
+name = "Ollama Cloud"
+base_url = "https://ollama.com/v1"
+env_key = "OLLAMA_API_KEY"
 wire_api = "responses"
 requires_openai_auth = false

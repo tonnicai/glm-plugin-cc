@@ -1,17 +1,17 @@
 {
-  "name": "z-ai-glm",
+  "name": "tonnicai",
   "owner": {
     "name": "tonnicai"
   },
   "metadata": {
-    "description": "Delegation-style GLM plugin for Claude Code: GLM reviews and takes on delegated coding tasks while Claude keeps driving on your Anthropic model.",
-    "version": "1.0.0"
+    "description": "Delegation-style plugins for Claude Code: hand code review and coding tasks to GLM-5.2 and other Ollama Cloud models while Claude keeps driving on your Anthropic model.",
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "glm",
-      "description": "Delegate code review and coding tasks to Z.ai GLM from Claude Code, while Claude keeps driving on your Anthropic model.",
-      "version": "1.0.0",
+      "description": "Delegate code review and coding tasks to GLM-5.2 (1M context, via Ollama Cloud) from Claude Code, while Claude keeps driving on your Anthropic model.",
+      "version": "1.1.0",
       "author": {
         "name": "tonnicai"
       },
@@ -19,8 +19,8 @@
     },
     {
       "name": "ollama",
-      "description": "Delegate code review and coding tasks to Ollama Cloud models (GLM, Qwen3-Coder, DeepSeek, ...) from Claude Code, while Claude keeps driving on your Anthropic model.",
-      "version": "1.0.0",
+      "description": "Delegate code review and coding tasks to any Ollama Cloud model (GLM, Qwen3-Coder, DeepSeek, Kimi, ...) from Claude Code, while Claude keeps driving on your Anthropic model.",
+      "version": "1.1.0",
       "author": {
         "name": "tonnicai"
       },
