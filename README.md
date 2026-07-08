@@ -11,7 +11,10 @@ This marketplace ships two delegation-style plugins built on the same isolated-h
 
 Neither reroutes Claude Code's own model, and neither touches your `~/.claude` configuration. They are fully namespace-isolated (separate env vars, broker sockets, and harness homes), so you can install both — plus OpenAI's original `codex` plugin — side by side.
 
-> **Wire-format note (important):** codex ≥ 0.84 only speaks the OpenAI **Responses API** (`wire_api = "responses"`); chat-completions support was removed. Ollama Cloud supports the Responses API natively. Z.ai's coding endpoint is historically chat-completions — if the direct Z.ai backend fails for you, point the `glm` plugin at GLM-5.2 on Ollama Cloud instead using [`config/codex-glm-via-ollama-cloud.config.toml`](config/codex-glm-via-ollama-cloud.config.toml).
+> **Backend status (verified live, 2026-07-07):**
+> - ✅ **Ollama Cloud works end-to-end** — codex ≥ 0.84 only speaks the OpenAI **Responses API**, and Ollama Cloud supports it natively (GLM-5.2 verified responding through the full chain).
+> - ❌ **Z.ai direct does NOT currently work** — `POST https://api.z.ai/api/coding/paas/v4/responses` returns **404** (no Responses endpoint; their API is chat-completions, which codex removed). No client-side setting can bridge this.
+> - **To run the `glm` plugin today**, use GLM-5.2 on Ollama Cloud via [`config/codex-glm-via-ollama-cloud.config.toml`](config/codex-glm-via-ollama-cloud.config.toml) as your `~/.codex-glm/config.toml`. The direct Z.ai config ([`config/codex-glm.config.toml`](config/codex-glm.config.toml)) is kept for the day Z.ai ships Responses support.
 
 ## How it stays out of your way
 
@@ -24,7 +27,9 @@ Neither reroutes Claude Code's own model, and neither touches your `~/.claude` c
 
 You need four things: a Z.ai key, the `codex` harness binary, the GLM config, and the key exported to your environment. Then install the plugin.
 
-### 1. Get a Z.ai API key
+### 1. Get an API key
+
+> **Which key?** Until Z.ai ships a Responses endpoint, the working GLM backend is **Ollama Cloud** — get a key at <https://ollama.com/settings/keys> and you'll use `OLLAMA_API_KEY` below. The Z.ai steps are kept for when their direct backend becomes possible:
 
 1. Sign up for the **GLM Coding Plan**: <https://z.ai/subscribe> (or the pay-as-you-go platform at <https://z.ai/model-api>).
 2. Open the **API Keys** page: <https://z.ai/manage-apikey/apikey-list>.
@@ -42,21 +47,24 @@ npm install -g @openai/codex
 
 ### 3. Create `~/.codex-glm/config.toml`
 
-This points the isolated harness at Z.ai GLM. A ready-to-copy version lives at [`config/codex-glm.config.toml`](config/codex-glm.config.toml) — copy it to `~/.codex-glm/config.toml`:
+Use the **working** backend — GLM-5.2 served by Ollama Cloud. Copy [`config/codex-glm-via-ollama-cloud.config.toml`](config/codex-glm-via-ollama-cloud.config.toml) to `~/.codex-glm/config.toml`:
 
 ```toml
 model = "glm-5.2"
-model_provider = "zai"
+model_context_window = 1000000
+model_provider = "ollama-cloud"
 
-[model_providers.zai]
-name = "Z.ai GLM Coding Plan"
-base_url = "https://api.z.ai/api/coding/paas/v4"
-env_key = "ZAI_API_KEY"
+[model_providers.ollama-cloud]
+name = "Ollama Cloud"
+base_url = "https://ollama.com/v1"
+env_key = "OLLAMA_API_KEY"
 wire_api = "responses"
 requires_openai_auth = false
 ```
 
-The `env_key = "ZAI_API_KEY"` line tells the harness to read your key from the `ZAI_API_KEY` environment variable — so the key lives only in your environment, never in this file or the repo.
+The `env_key` line tells the harness to read your key from that environment variable — the key lives only in your environment, never in this file or the repo.
+
+(The direct Z.ai variant, [`config/codex-glm.config.toml`](config/codex-glm.config.toml), returns **404** today — Z.ai has no Responses endpoint. Swap to it only if Z.ai announces Responses API support.)
 
 ### 4. Add your key to the environment
 

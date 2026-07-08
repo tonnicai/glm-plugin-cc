@@ -1,3 +1,11 @@
+# >>> CURRENTLY NOT WORKING — verified 2026-07-07 <<<
+# Z.ai's coding endpoint has no OpenAI Responses API: POST
+# https://api.z.ai/api/coding/paas/v4/responses returns 404 with a valid key,
+# and codex >= 0.84 only speaks the Responses wire (chat-completions removed).
+# Until Z.ai ships a /responses endpoint, use the working backend instead:
+#   config/codex-glm-via-ollama-cloud.config.toml  (GLM-5.2 on Ollama Cloud)
+# This file is kept so the direct Z.ai backend is one copy away if/when
+# Z.ai adds Responses support.
 model = "glm-5.2"
 model_provider = "zai"
 
