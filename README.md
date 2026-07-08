@@ -39,7 +39,7 @@ The plugin drives the `codex` binary as its harness. You need the binary install
 2. **Create `~/.codex-glm/config.toml`** pointing the harness at Z.ai GLM. A ready-to-copy version lives at [`config/codex-glm.config.toml`](config/codex-glm.config.toml):
 
    ```toml
-   model = "glm-4.7"
+   model = "glm-5.2"
    model_provider = "zai"
 
    [model_providers.zai]
