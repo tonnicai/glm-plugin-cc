@@ -45,7 +45,7 @@ model_provider = "zai"
 name = "Z.ai GLM Coding Plan"
 base_url = "https://api.z.ai/api/coding/paas/v4"
 env_key = "ZAI_API_KEY"
-wire_api = "chat"
+wire_api = "responses"
 requires_openai_auth = false
 ```
 
