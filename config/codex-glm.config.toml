@@ -1,0 +1,9 @@
+model = "glm-5.2"
+model_provider = "zai"
+
+[model_providers.zai]
+name = "Z.ai GLM Coding Plan"
+base_url = "https://api.z.ai/api/coding/paas/v4"
+env_key = "ZAI_API_KEY"
+wire_api = "chat"
+requires_openai_auth = false

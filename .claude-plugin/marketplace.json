@@ -1,0 +1,21 @@
+{
+  "name": "z-ai-glm",
+  "owner": {
+    "name": "tonnicai"
+  },
+  "metadata": {
+    "description": "Delegation-style GLM plugin for Claude Code: GLM reviews and takes on delegated coding tasks while Claude keeps driving on your Anthropic model.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "glm",
+      "description": "Delegate code review and coding tasks to Z.ai GLM from Claude Code, while Claude keeps driving on your Anthropic model.",
+      "version": "1.0.0",
+      "author": {
+        "name": "tonnicai"
+      },
+      "source": "./plugins/glm"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "glm",
+  "version": "1.0.0",
+  "description": "Delegate code review and coding tasks to Z.ai GLM from Claude Code, while Claude keeps driving on your Anthropic model.",
+  "author": {
+    "name": "tonnicai"
+  }
+}
