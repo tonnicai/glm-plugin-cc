@@ -1,0 +1,15 @@
+# ALTERNATE backend for the `glm` plugin: GLM-5.2 served by Ollama Cloud
+# instead of Z.ai directly. Use this if Z.ai's endpoint does not accept
+# Responses-API requests (codex >= 0.84 removed chat-completions support).
+#
+# Copy to ~/.codex-glm/config.toml (replacing the Z.ai variant), get a key at
+# https://ollama.com/settings/keys, and export OLLAMA_API_KEY.
+model = "glm-5.2:cloud"
+model_provider = "ollama-cloud"
+
+[model_providers.ollama-cloud]
+name = "Ollama Cloud"
+base_url = "https://ollama.com/v1"
+env_key = "OLLAMA_API_KEY"
+wire_api = "responses"
+requires_openai_auth = false

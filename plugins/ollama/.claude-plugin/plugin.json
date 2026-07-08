@@ -1,0 +1,8 @@
+{
+  "name": "ollama",
+  "version": "1.0.0",
+  "description": "Delegate code review and coding tasks to Ollama Cloud models (GLM, Qwen3-Coder, DeepSeek, ...) from Claude Code, while Claude keeps driving on your Anthropic model.",
+  "author": {
+    "name": "tonnicai"
+  }
+}

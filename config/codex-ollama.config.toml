@@ -1,0 +1,14 @@
+# Harness config for the `ollama` plugin — copy to ~/.codex-ollama/config.toml
+# Get an API key at https://ollama.com/settings/keys and export OLLAMA_API_KEY.
+#
+# Default model: GLM-5.2 hosted on Ollama Cloud (1M context, tool calling).
+# Other strong cloud options: "qwen3-coder", "deepseek-v3.1", "kimi-k2", "gpt-oss:120b".
+model = "glm-5.2:cloud"
+model_provider = "ollama-cloud"
+
+[model_providers.ollama-cloud]
+name = "Ollama Cloud"
+base_url = "https://ollama.com/v1"
+env_key = "OLLAMA_API_KEY"
+wire_api = "responses"
+requires_openai_auth = false

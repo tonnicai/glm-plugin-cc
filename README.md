@@ -1,10 +1,17 @@
-# GLM Plugin for Claude Code
+# GLM & Ollama Cloud Plugins for Claude Code
 
-Delegate **code review** and **coding tasks** to [Z.ai GLM](https://z.ai) from inside Claude Code — while Claude Code itself keeps driving on **your Anthropic model**.
+Delegate **code review** and **coding tasks** to [Z.ai GLM](https://z.ai) or [Ollama Cloud](https://ollama.com/cloud) models from inside Claude Code — while Claude Code itself keeps driving on **your Anthropic model**.
 
-This is a delegation-style plugin: GLM is a *reviewer / task runner* that Claude hands work to. It does **not** reroute Claude Code's own model, and it does **not** touch your `~/.claude` configuration.
+This marketplace ships two delegation-style plugins built on the same isolated-harness design (each is a rebrand of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc), driving the `codex` binary as its engine):
 
-It is a rebrand of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc): it still uses the `codex` binary as the underlying harness (`codex app-server`), but points that harness at the GLM API and runs it under a fully isolated home directory.
+| Plugin | Commands | Backend | Harness home | Key env var |
+|---|---|---|---|---|
+| `glm` | `/glm:*` | Z.ai GLM Coding Plan (`api.z.ai`) | `~/.codex-glm` | `ZAI_API_KEY` |
+| `ollama` | `/ollama:*` | Ollama Cloud (`ollama.com`) — GLM-5.2, Qwen3-Coder, DeepSeek, Kimi, gpt-oss | `~/.codex-ollama` | `OLLAMA_API_KEY` |
+
+Neither reroutes Claude Code's own model, and neither touches your `~/.claude` configuration. They are fully namespace-isolated (separate env vars, broker sockets, and harness homes), so you can install both — plus OpenAI's original `codex` plugin — side by side.
+
+> **Wire-format note (important):** codex ≥ 0.84 only speaks the OpenAI **Responses API** (`wire_api = "responses"`); chat-completions support was removed. Ollama Cloud supports the Responses API natively. Z.ai's coding endpoint is historically chat-completions — if the direct Z.ai backend fails for you, point the `glm` plugin at GLM-5.2 on Ollama Cloud instead using [`config/codex-glm-via-ollama-cloud.config.toml`](config/codex-glm-via-ollama-cloud.config.toml).
 
 ## How it stays out of your way
 
@@ -84,15 +91,45 @@ Then restart the terminal you launch Claude Code from.
 
 Run `/glm:setup` — it checks that the `codex` binary, the GLM config, and your key are all wired up. If it reports an auth problem, `ZAI_API_KEY` almost certainly isn't visible to Claude Code yet (recheck step 4 and restart Claude Code). Then try `/glm:review`.
 
+## The `ollama` plugin (Ollama Cloud)
+
+Same delegation design, pointed at [Ollama Cloud](https://ollama.com/cloud) — which hosts GLM-5.2 (1M context), Qwen3-Coder, DeepSeek-V3.1, Kimi-K2, gpt-oss and more, and natively supports the Responses API that current codex requires.
+
+1. **Get an Ollama API key**: create one at <https://ollama.com/settings/keys> (Ollama Cloud account required).
+2. **Create `~/.codex-ollama/config.toml`** — copy [`config/codex-ollama.config.toml`](config/codex-ollama.config.toml):
+
+   ```toml
+   model = "glm-5.2:cloud"
+   model_provider = "ollama-cloud"
+
+   [model_providers.ollama-cloud]
+   name = "Ollama Cloud"
+   base_url = "https://ollama.com/v1"
+   env_key = "OLLAMA_API_KEY"
+   wire_api = "responses"
+   requires_openai_auth = false
+   ```
+
+   Swap `model` for any cloud model you prefer (`qwen3-coder`, `deepseek-v3.1`, `kimi-k2`, `gpt-oss:120b`).
+3. **Set the key** (persistent, before Claude Code starts — same rules as step 4 above): Windows `setx OLLAMA_API_KEY "your-key"`, macOS/Linux `export OLLAMA_API_KEY=...` in your shell profile. Restart Claude Code.
+4. **Install**:
+
+   ```text
+   /plugin install ollama@z-ai-glm
+   /reload-plugins
+   ```
+
+5. **Verify** with `/ollama:setup`, then try `/ollama:review`.
+
 ## Use
 
-- `/glm:review` — hand the current diff to GLM for review. Claude stays on your Anthropic model and relays GLM's findings.
-- `/glm:adversarial-review` — a stricter, focused review pass.
-- `/glm:rescue` (agent `glm:glm-rescue`) — delegate a substantial coding/diagnosis task to GLM.
-- `/glm:status`, `/glm:result`, `/glm:cancel` — manage background GLM jobs.
-- `/glm:setup` — check that the harness and auth are ready.
+- `/glm:review` / `/ollama:review` — hand the current diff to the delegate for review. Claude stays on your Anthropic model and relays the findings.
+- `/glm:adversarial-review` / `/ollama:adversarial-review` — a stricter, focused review pass.
+- `/glm:rescue` / `/ollama:rescue` (agents `glm:glm-rescue`, `ollama:ollama-rescue`) — delegate a substantial coding/diagnosis task.
+- `/glm:status`, `/glm:result`, `/glm:cancel` — manage background jobs (same for `/ollama:*`).
+- `/glm:setup` / `/ollama:setup` — check that the harness and auth are ready.
 
-Because it shares the same harness design as the Codex plugin, you can run the two side by side: `/codex:review` delegates to Codex/GPT, `/glm:review` delegates to GLM, and Claude Code keeps orchestrating both on your Anthropic model.
+All three plugins (codex, glm, ollama) share the same harness design and are namespace-isolated, so `/codex:review`, `/glm:review`, and `/ollama:review` can coexist in one session — Claude Code keeps orchestrating on your Anthropic model.
 
 ## License
 
