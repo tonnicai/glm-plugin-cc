@@ -99,7 +99,8 @@ Same delegation design, pointed at [Ollama Cloud](https://ollama.com/cloud) — 
 2. **Create `~/.codex-ollama/config.toml`** — copy [`config/codex-ollama.config.toml`](config/codex-ollama.config.toml):
 
    ```toml
-   model = "glm-5.2:cloud"
+   model = "glm-5.2"
+   model_context_window = 1000000
    model_provider = "ollama-cloud"
 
    [model_providers.ollama-cloud]
@@ -110,7 +111,9 @@ Same delegation design, pointed at [Ollama Cloud](https://ollama.com/cloud) — 
    requires_openai_auth = false
    ```
 
-   Swap `model` for any cloud model you prefer (`qwen3-coder`, `deepseek-v3.1`, `kimi-k2`, `gpt-oss:120b`).
+   Swap `model` for any cloud model you prefer (`qwen3-coder`, `deepseek-v3.1`, `kimi-k2`, `gpt-oss:120b`) — on the direct cloud API model names carry **no** `:cloud` suffix.
+
+   **About context:** clients on Ollama's *native* API (e.g. n8n) must pass `num_ctx` per request to unlock the full window. Codex speaks the OpenAI wire, which has no such field — instead, Ollama Cloud runs cloud models at their full advertised window server-side, and `model_context_window = 1000000` tells codex the window is 1M so it budgets correctly and doesn't compact the conversation prematurely. Scale it down if you pick a smaller-window model.
 3. **Set the key** (persistent, before Claude Code starts — same rules as step 4 above): Windows `setx OLLAMA_API_KEY "your-key"`, macOS/Linux `export OLLAMA_API_KEY=...` in your shell profile. Restart Claude Code.
 4. **Install**:
 

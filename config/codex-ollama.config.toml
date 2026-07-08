@@ -2,8 +2,17 @@
 # Get an API key at https://ollama.com/settings/keys and export OLLAMA_API_KEY.
 #
 # Default model: GLM-5.2 hosted on Ollama Cloud (1M context, tool calling).
-# Other strong cloud options: "qwen3-coder", "deepseek-v3.1", "kimi-k2", "gpt-oss:120b".
-model = "glm-5.2:cloud"
+# Note: on the direct cloud API (ollama.com) model names have NO "-cloud"/":cloud"
+# suffix — use "glm-5.2", "qwen3-coder", "deepseek-v3.1", "kimi-k2", "gpt-oss:120b".
+model = "glm-5.2"
+
+# Client-side context budget. Codex cannot send Ollama's num_ctx over the
+# OpenAI wire; Ollama Cloud runs cloud models at their full advertised window
+# server-side. This key tells codex the window is 1M so it does not compact
+# or trim the conversation prematurely. Adjust if you switch to a smaller model
+# (e.g. 256000 for qwen3-coder).
+model_context_window = 1000000
+
 model_provider = "ollama-cloud"
 
 [model_providers.ollama-cloud]
