@@ -1,4 +1,4 @@
-model = "glm-5.2"
+model = "glm-4.7"
 model_provider = "zai"
 
 [model_providers.zai]
